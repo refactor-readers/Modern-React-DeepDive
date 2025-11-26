@@ -30,7 +30,7 @@
   - WHAT / HOW / WHY 방식 환영합니다.
   - 퀴즈 형태나 토론을 유도하는 질문도 모두 괜찮습니다.
 
-## 🔧 인증 방법
+## 🔧 진행 방법
 
 1. organization repo clone
 2. `main`에서 `${아이디}` 브랜치 생성
@@ -38,24 +38,13 @@
 4. 챕터별 정리본 업로드 (markdown)
 5. `main` 브랜치로 Pull Request
 
-## ⏰ 커리큘럼 & 일정
-
-| 회차  | 챕터       | 날짜             |
-| ----- | ---------- | ---------------- |
-| OT    | 1          | 2025년 11월 10일 |
-| 1회차 | 1          | 2025년 11월 19일 |
-| 2회차 | 2          | 2025년 11월 26일 |
-| 3회차 | 3          | 2025년 12월 03일 |
-| 4회차 | 4          | 2025년 12월 10일 |
-| 5회차 | 5          | 2025년 12월 17일 |
-| 6회차 | 7          | 2025년 12월 24일 |
-| 7회차 | 8, 10      | 2025년 12월 31일 |
-| 8회차 | 11, 12, 13 | 2025년 01월 07일 |
-| 9회차 | 14, 15     | 2025년 01월 14일 |
-
 ## 👥 스터디 멤버
 
 |                                                                        |                                                                  |                                                                    |                                                                                    |                                                                  |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | <img src="https://github.com/codingaring.png" width="130">             | <img src="https://github.com/bokeeeey.png" width="130">          | <img src="https://github.com/bumpy1800.png" width="130">           | <img src="https://github.com/AdamSeungheonShin.png" width="130">                   | <img src="https://github.com/jooheeOk.png" width="130">          |
 | **김유경 <a href="https://github.com/codingaring">(@codingaring)</a>** | **김보경 <a href="https://github.com/bokeeeey">(@bokeeeey)</a>** | **김재성 <a href="https://github.com/bumpy1800">(@bumpy1800)</a>** | **신승헌 <a href="https://github.com/AdamSeungheonShin">(@AdamSeungheonShin)</a>** | **옥주희 <a href="https://github.com/jooheeOk">(@jooheeOk)</a>** |
+
+## 👀 참고 레퍼런스
+
+[《모던 리액트 Deep Dive》 예제 코드](https://github.com/wikibook/react-deep-dive-example)
