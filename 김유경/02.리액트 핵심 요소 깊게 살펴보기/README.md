@@ -564,5 +564,5 @@ componentDidUpdate(prevProps:Props, prevState:State, snapshot:Snapshot){
 정상적인 생명 주기에서 실행되는 메서드가 아니라 에러 상황에서 실행되는 메서드
 
 - 이 메서드와 `getSnapshotBeforeUpdate`는 아지 리액트 훅으로 구현되어 있지 않아 반드시 클래스형 컴포넌트를 사용해야 한다.
-- 자식 컴포넌트에서 에러가 발생했을 때 호출되는 에러 메서드이다.b
+- 자식 컴포넌트에서 에러가 발생했을 때 호출되는 에러 메서드이다.
   > ErrorBoundary.tsx
