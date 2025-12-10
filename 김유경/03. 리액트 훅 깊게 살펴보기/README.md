@@ -3,7 +3,7 @@
 - 함수형 컴포넌트가 상태를 사용하거나 클래스형 컴포넌트의 생명주기 메서드를 대체하는 등의 다양한 작업을 하기 위해 훅이 추가 됨
 - 훅을 활용하면 클래스형 컴포넌트가 아니더라도 리액트의 다양한 기능 활용이 가능
 
-# 1. 리액트의 모든 훅 파헤치기 (낋겨보자)
+# 1. 리액트의 모든 훅 파헤치기
 
 리액트 함수형 컴포넌트에서 가장 중요한 개념이 바로 훅
 
@@ -24,8 +24,8 @@ const [state, setState] = useState(initialState);
 
 - useState의 인수로 초깃값을 전달, 없으면 undefined
 - useState 훅의 반환 값은 배열
-  - 첫 번째 원소는 state 값 자체
-  - 두 번째 원소는 setState 함수를 사용해 해당 state의 값을 변경할 수 있음
+    - 첫 번째 원소는 state 값 자체
+    - 두 번째 원소는 setState 함수를 사용해 해당 state의 값을 변경할 수 있음
 
 **useState를 사용하지 않고 함수 내부에서 자체적으로 변수를 사용해 상태값을 관리할 때**
 
@@ -39,8 +39,9 @@ function Component() {
 
   return (
     <>
-      <h1>{state}</h1>
-      <button onClick={handleButtonClick}>hi</button>
+            <h1>{state}</h1>      <button onClick={handleButtonClick}>
+        hi
+      </button>   {" "}
     </>
   );
 }
@@ -69,8 +70,9 @@ function Component() {
 
   return (
     <>
-      <h1>{state}</h1>
-      <button onClick={handleButtonClick}>hi</button>
+            <h1>{state}</h1>      <button onClick={handleButtonClick}>
+        hi
+      </button>   {" "}
     </>
   );
 }
@@ -133,25 +135,18 @@ const MyReact = function () {
       // 애플리케이션 전체의 states 배열을 초기화한다.
       // 최초 접근이면 빈 배열로 초기화한다.
       global.states = [];
-    }
+    } // states 정보를 조회해서 현재 상태값이 있는지 확인하고, 없다면 초깃값으로 설정한다.
 
-    // states 정보를 조회해서 현재 상태값이 있는지 확인하고, 없다면 초깃값으로 설정한다.
-    const currentState = global.states[index] || initialState;
-    // states의 값을 위해서, 조회한 현재 값으로 업데이트한다.
-    global.states[index] = currentState;
+    const currentState = global.states[index] || initialState; // states의 값을 위해서, 조회한 현재 값으로 업데이트한다.
+    global.states[index] = currentState; // 즉시 실행 함수로 setter를 만든다.
 
-    // 즉시 실행 함수로 setter를 만든다.
     const setState = (function () {
       // 현재 index를 클로저로 가둬놔서 이후에도 계속해서 동일한 index에 접근할 수 있도록 한다.
       let currentIndex = index;
       return function (value) {
-        global.states[currentIndex] = value;
-        // 컴포넌트를 렌더링한다. 실제로 컴포넌트를 렌더링 하는 코드는 생략했다.
+        global.states[currentIndex] = value; // 컴포넌트를 렌더링한다. 실제로 컴포넌트를 렌더링 하는 코드는 생략했다.
       };
-    })();
-    // useState를 쓸 때마다 index를 하나씩 추가한다. 이 index는 setState에서 사용된다.
-    // 즉, 하나의 state마다 index가 할당돼 있어 그  index가 배열의 값 (global.states)을
-    // 가리키고 필요할 때마다 그 값을 가져오게 한다.
+    })(); // useState를 쓸 때마다 index를 하나씩 추가한다. 이 index는 setState에서 사용된다. // 즉, 하나의 state마다 index가 할당돼 있어 그  index가 배열의 값 (global.states)을 // 가리키고 필요할 때마다 그 값을 가져오게 한다.
     index = index + 1;
 
     return [currentState, setState];
@@ -190,7 +185,7 @@ useState의 기본값으로 `특정한 값을 반환하는 함수`를 넘기는 
 
 - 두 개의 인수를 받는데, 첫 번째는 콜백, 두 번째는 의존성 배열이다. 이 두 번째 의존성 배열의 값이 변경되면 첫 번째 인수인 콜백을 실행한다.
 - 클래스형 컴포넌트의 생명주기 메서드와 비슷한 작동을 구현할 수 있다. 두 번째 의존성 배열에 빈 배열을 넣으면 컴포넌트가 마운트될 때만 실행된다.
-  => ❌ 생명 주기 메서드를 대체하기 위해 만들어진 훅도 아니다.
+    => ❌ 생명 주기 메서드를 대체하기 위해 만들어진 훅도 아니다.
 - useEffect는 클린업 함수를 반환할 수 있는데, 이 클린업 함수는 컴포넌트가 언마운트 될 때 실행된다.
 
 => 위의 정의들은 어느 정도 옳지만 정확하지는 않다.
@@ -210,8 +205,7 @@ function Component() {
 
   useEffect(() => {
     // do something
-  }, [props, state]);
-  // ...
+  }, [props, state]); // ...
 }
 ```
 
@@ -237,8 +231,8 @@ function Component() {
 
   return (
     <>
-      <h1>{counter}</h1>
-      <button onClick={handleClick}>+</button>
+            <h1>{counter}</h1>      <button onClick={handleClick}>+</button> 
+       {" "}
     </>
   );
 }
@@ -262,8 +256,8 @@ function Component() {
 
   return (
     <>
-      <h1>{counter}</h1>
-      <button onClick={handleClick}>+</button>
+            <h1>{counter}</h1>      <button onClick={handleClick}>+</button> 
+       {" "}
     </>
   );
 }
@@ -290,9 +284,8 @@ export default function App() {
       console.log(counter);
     }
 
-    window.addEventListener("click", addMouseEvent);
+    window.addEventListener("click", addMouseEvent); // 클린업 함수 (Cleanup function)
 
-    // 클린업 함수 (Cleanup function)
     return () => {
       console.log("클린업 함수 실행!", counter);
       window.removeEventListener("click", addMouseEvent);
@@ -301,8 +294,8 @@ export default function App() {
 
   return (
     <>
-      <h1>{counter}</h1>
-      <button onClick={handleClick}>+</button>
+            <h1>{counter}</h1>      <button onClick={handleClick}>+</button> 
+       {" "}
     </>
   );
 }
@@ -339,10 +332,8 @@ useEffect(() => {
     console.log(1);
   }
 
-  window.addEventListener("click", addMouseEvent);
+  window.addEventListener("click", addMouseEvent); // 클린업 함수 // 그리고 이 클린업 함수는 다음 렌더링이 끝난 뒤에 실행된다.
 
-  // 클린업 함수
-  // 그리고 이 클린업 함수는 다음 렌더링이 끝난 뒤에 실행된다.
   return () => {
     console.log("클린업 함수 실행!", 1);
     window.removeEventListener("click", addMouseEvent);
@@ -357,9 +348,8 @@ useEffect(() => {
     console.log(2);
   }
 
-  window.addEventListener("click", addMouseEvent);
+  window.addEventListener("click", addMouseEvent); // 클린업 함수 (Cleanup function)
 
-  // 클린업 함수 (Cleanup function)
   return () => {
     console.log("클린업 함수 실행!", 2);
     window.removeEventListener("click", addMouseEvent);
@@ -374,19 +364,19 @@ useEffect(() => {
 => 이를 통해 특정 이벤트의 핸들러가 무한히 추가되는 것을 방지할 수 있다.
 
 - 언마운트 개념과는 차이가 있다.
-  - 언마운트는 특정 컴포넌트가 DOM에서 사라진다는 것을 의미하는 클래스형 컴포넌트의 용어이다.
-  - 클린업 함수는 언마운트라기보다는 함수형 컴포넌트가 리렌더링됐을 때 의존성 변화가 있었을 당시 이전의 값을 기준으로 실행되는, 말 그대로 이전 상태를 청소해주는 개념으로 보는 것이 옳다.
+    - 언마운트는 특정 컴포넌트가 DOM에서 사라진다는 것을 의미하는 클래스형 컴포넌트의 용어이다.
+    - 클린업 함수는 언마운트라기보다는 함수형 컴포넌트가 리렌더링됐을 때 의존성 변화가 있었을 당시 이전의 값을 기준으로 실행되는, 말 그대로 이전 상태를 청소해주는 개념으로 보는 것이 옳다.
 
 #### 의존성 배열
 
 - 빈 배열
 
-  - 리액트는 이 useEffect는 비교할 의존성이 없다고 판단해 최초 렌더링 ㅈ익후에 실행된 다음부터는 더 이상 실행되지 않는다.
+- 리액트는 이 useEffect는 비교할 의존성이 없다고 판단해 최초 렌더링 ㅈ익후에 실행된 다음부터는 더 이상 실행되지 않는다.
 
 - 아무런 값도 넘겨주지 않을 때
 
-  - 의존성을 비교할 필요 없이 렌더링할 때마다 실행이 필요하다고 판단해 렌더링이 발생할 때마다 실행된다.
-  - 컴포넌트가 렌더링 됐는지 확인하기 위한 방법으로 사용됨
+- 의존성을 비교할 필요 없이 렌더링할 때마다 실행이 필요하다고 판단해 렌더링이 발생할 때마다 실행된다.
+  - 컴포넌트가 렌더링 됐는지 확인하기 위한 방법으로 사용됨
 
 - 사용자가 직접 원하는 값
 
@@ -408,9 +398,9 @@ function Component() {
 
 1. 서버 사이드 렌더링 관점에서 useEffect는 클라이언트 사이드에서 실행되는 것을 보장해준다. useEffect 내부에서는 window 객체의 접근에 의존하는 코드를 사용해도 된다.
 2. useEffect는 컴포넌트 렌더링의 부수 효과, 즉 컴포넌트 렌더링이 완료된 이후에 실행된다.
-   - 반면 직접 실행은 컴포넌트가 렌더링되는 도중에 실행된다.
-   - 따라서 1번과는 달리 서버 사이드 렌더링의 경우에 서버에서도 실행된다.
-   - 이 작업은 함수형 컴포넌트의 반환을 지연시키는 행위다. 즉, 무거운 작업일 경우 렌더링을 방해하므로 성능에 악영향을 미칠 수 있다.
+      - 반면 직접 실행은 컴포넌트가 렌더링되는 도중에 실행된다.
+      - 따라서 1번과는 달리 서버 사이드 렌더링의 경우에 서버에서도 실행된다.
+      - 이 작업은 함수형 컴포넌트의 반환을 지연시키는 행위다. 즉, 무거운 작업일 경우 렌더링을 방해하므로 성능에 악영향을 미칠 수 있다.
 
 useEffect의 effect는 컴포넌트의 사이드 이펙트, 즉 부수 효과를 의미한다는 것을 명심하자
 
@@ -424,29 +414,22 @@ const MyReact = (function () {
   let index = 0;
 
   function useEffect(callback, dependencies) {
-    const hooks = global.hooks;
+    const hooks = global.hooks; // 이전 훅 정보가 있는지 확인한다.
 
-    // 이전 훅 정보가 있는지 확인한다.
-    let previousDependencies = hooks[index];
+    let previousDependencies = hooks[index]; // 변경됐는지 확인 // 이전 값이 있다면 이전 값을 얕은 비교로 비교해 변경이 일어났는지 확인한다. // 이전 값이 없다면 최초 실행이므로 변경이 일어난 것으로 간주해 실행을 유도한다.
 
-    // 변경됐는지 확인
-    // 이전 값이 있다면 이전 값을 얕은 비교로 비교해 변경이 일어났는지 확인한다.
-    // 이전 값이 없다면 최초 실행이므로 변경이 일어난 것으로 간주해 실행을 유도한다.
     let isDependenciesChanged = previousDependencies
       ? dependencies.some(
           (value, idx) => !Object.is(value, previousDependencies[idx])
         )
-      : true;
+      : true; // 변경이 일어났다면 첫 번째 인수인 콜백 함수를 실행한다.
 
-    // 변경이 일어났다면 첫 번째 인수인 콜백 함수를 실행한다.
     if (isDependenciesChanged) {
       callback();
-    }
+    } // 현재 의존성을 훅에 다시 저장한다.
 
-    // 현재 의존성을 훅에 다시 저장한다.
-    hooks[index] = dependencies;
+    hooks[index] = dependencies; // 다음 훅이 일어날 때를 대비하기 위해 index를 추가한다.
 
-    // 다음 훅이 일어날 때를 대비하기 위해 index를 추가한다.
     index++;
   }
 
@@ -466,7 +449,7 @@ const MyReact = (function () {
 - 조심하지 않으면 무한 루프에 빠져버린다구~!
 
 1. eslint-disable-line react-hooks/exhaustive-deps 주석은 최대한 자제하라
-   이 주석을 사용하여 ESLint의 경고를 무시하기도 한다.
+      이 주석을 사용하여 ESLint의 경고를 무시하기도 한다.
 
 - 해당 룰은 useEffect 인수 내부에서 사용하는 값 중 의존성 배열에 포함돼 있지 않은 값이 있을 때 경고를 발생시킨다.
 
@@ -483,7 +466,7 @@ useEffect는 반드시 의존성 배열로 전달한 값의 변경에 의해 실
 useEffect에서 사용한 콜백 함수의 실행과 내부에서 사용한 값의 실제 변경 사이에 연결 고리가 끊어져 있는 것이다.
 
 - 정말 의존성으로 []가 필요하다면 최초에 함수형 컴포넌트가 마운트됐을 시점에만 콜백 함수 실행이 필요한지를 다시 한 번 되물어보자
-  - 정말 Yes 라면, 애초에 useEffect 내 부수 효과가 실행될 위치가 잘못됐을 가능성이 크다.
+    - 정말 Yes 라면, 애초에 useEffect 내 부수 효과가 실행될 위치가 잘못됐을 가능성이 크다.
 
 ```tsx
 function Component({ log }: { log: string }) {
@@ -539,7 +522,7 @@ function Component({ id }: { id: string }) {
 ```
 
 - props를 받아서 그 정보를 바탕으로 API 호출을 하는 useEffect를 가지고 있다.
-  - but, useEffect 밖에서 함수를 선언하다보니, 불필요한 코드가 많아지고 가독성이 떨어졌다.
+    - but, useEffect 밖에서 함수를 선언하다보니, 불필요한 코드가 많아지고 가독성이 떨어졌다.
 
 개선 뒤
 
@@ -586,7 +569,7 @@ useEffect(async () => {
 그렇다면 비동기 함수는 어떻게 실행하나요?
 
 - useEffect의 인수로 비동기 함수를 지정할 수 없는거지, 비동기 함수 실행 자체가 문제가 되는 것은 아니다.
-  - useEffect 내부에서 비동기 함수를 선언해 실행하거나, 즉시 실행 비동기 함수를 만들어서 사용하는 것은 가능하다.
+    - useEffect 내부에서 비동기 함수를 선언해 실행하거나, 즉시 실행 비동기 함수를 만들어서 사용하는 것은 가능하다.
 
 ```tsx
 useEffect(() => {
@@ -594,9 +577,8 @@ useEffect(() => {
 
   async function fetchData() {
     const response = await fetch("http://some.data.com");
-    const result = await response.json();
+    const result = await response.json(); // 요청이 완료된 후, 컴포넌트가 언마운트되지 않았는지 확인
 
-    // 요청이 완료된 후, 컴포넌트가 언마운트되지 않았는지 확인
     if (!shouldIgnore) {
       setData(result);
     }
@@ -643,9 +625,8 @@ function ExpensiveComponent({ value }) {
 
 function App() {
   const [value, setValue] = useState(10);
-  const [_, triggerRendering] = useState(false);
+  const [_, triggerRendering] = useState(false); // 컴포넌트의 props를 기준으로 컴포넌트 자체를 메모이제이션했다.
 
-  // 컴포넌트의 props를 기준으로 컴포넌트 자체를 메모이제이션했다.
   const MemoizedComponent = useMemo(
     () => <ExpensiveComponent value={value} />,
     [value]
@@ -661,9 +642,12 @@ function App() {
 
   return (
     <>
-      <input value={value} onChange={handleChange} />
-      <button onClick={handleClick}>렌더링 발생!</button>
-      <MemoizedComponent />
+            <input value={value} onChange={handleChange} />      <button
+        onClick={handleClick}
+      >
+        렌더링 발생!
+      </button>
+            <MemoizedComponent />   {" "}
     </>
   );
 }
@@ -679,24 +663,24 @@ useMemo가 값을 기억했다면, useCallback은 인수로 넘겨받은 콜백 
 
 ```tsx
 const ChildComponent = memo(( { name, value, onChange } ) => {
-  // 렌더링이 수행되는지 확인하기 위해 넣어봤다.
-  useEffect(() => {
-    console.log('rendering!', name)
-  })
+  // 렌더링이 수행되는지 확인하기 위해 넣어봤다.
+  useEffect(() => {
+    console.log('rendering!', name)
+  })
 
-  return (
-    <>
-      <h1>
-        {name} {value ? '켜짐' : '꺼짐'}
-      </h1>
-      <button onClick={onChange}>toggle</button>
-    </>
-  )
+  return (
+    <>
+      <h1>
+        {name} {value ? '켜짐' : '꺼짐'}
+      </h1>
+      <button onClick={onChange}>toggle</button>
+    </>
+  )
 })
 
 function App() {
-  const [status1, setStatus1] = useState(false)
-  const [status2, setStatus2] = useState(false)
+  const [status1, setStatus1] = useState(false)
+  const [status2, setStatus2] = useState(false)
 ```
 
 기본적으로 useCallback은 useMemo를 사용해서 구현할 수 있다.
@@ -728,15 +712,13 @@ let value = 0;
 function Component() {
   function handleClick() {
     value += 1;
-  }
-
-  // ...
+  } // ...
 }
 ```
 
 - 컴포넌트 렌더링도 안됐는데 value라는 값이 기본적으로 존재해서 메모리 상에 낭비 발생
 - 컴포넌트가 여러 번 생성되면 각 컴포넌트에서 가리키는 값이 모두 value로 동일하다.
-  - 컴포넌트가 초기화되는 지점이 다르더라도 하나의 값을 봐야하는 경우가 많지 않다.
+    - 컴포넌트가 초기화되는 지점이 다르더라도 하나의 값을 봐야하는 경우가 많지 않다.
 
 => 이러한 방식의 단점을 보완한 리액트식 접근 !
 
@@ -746,9 +728,8 @@ function Component() {
 
 ```tsx
 function RefComponent() {
-  const inputRef = useRef();
+  const inputRef = useRef(); // 이때는 미처 렌더링이 실행되기 전(반환되기 전)이므로 undefined를 반환한다.
 
-  // 이때는 미처 렌더링이 실행되기 전(반환되기 전)이므로 undefined를 반환한다.
   console.log(inputRef.current);
 
   useEffect(() => {
@@ -792,7 +773,7 @@ export function useRef(initialValue) {
 
 - 값이 변경돼도 렌더링되면 안된다는 점, 실제 값은 {current: value}와 같은 객체 형태로 되어 있다는 점을 떠올려보자.
 - 렌더링에 영향을 미치면 안되기 때문에 useMemo에 의도적으로 빈배열을 선언 -> 각 렌더링마다 동일한 객체를 가리킬 것이다.
-  - 객체의 값을 변경해도, 객체를 가리키는 주소가 변경되지 않는다는 것을 활용한 것으로 useMemo로 useRef를 구현할 수 있다.
+    - 객체의 값을 변경해도, 객체를 가리키는 주소가 변경되지 않는다는 것을 활용한 것으로 useMemo로 useRef를 구현할 수 있다.
 
 # 1.6. useContext
 
@@ -808,18 +789,21 @@ const Context = createContext<{ hello: string } | undefined>(undefined);
 function ParentComponent() {
   return (
     <>
+           {" "}
       <Context.Provider value={{ hello: "react" }}>
+               {" "}
         <Context.Provider value={{ hello: "javascript" }}>
-          <ChildComponent />
+                    <ChildComponent />       {" "}
         </Context.Provider>
+             {" "}
       </Context.Provider>
+         {" "}
     </>
   );
 }
 
 function ChildComponent() {
-  const value = useContext(Context);
-  // 가장 가까운 Provider의 값을 가져온다. 여기서는 'javascript'가 반환된다.
+  const value = useContext(Context); // 가장 가까운 Provider의 값을 가져온다. 여기서는 'javascript'가 반환된다.
   return <>{value ? value.hello : ""}</>;
 }
 ```
@@ -836,11 +820,10 @@ function ChildComponent() {
 
 ```tsx
 function ParentComponent() {
-  const [text, setText] = useState("");
-  // ... (text 변경 로직)
+  const [text, setText] = useState(""); // ... (text 변경 로직)
   return (
     <ContextProvider value={{ hello: text }}>
-      <GrandChildComponent />
+            <GrandChildComponent />   {" "}
     </ContextProvider>
   );
 }
@@ -854,10 +837,10 @@ function ParentComponent() {
 useState의 심화 버전으로, 복잡한 상태 값을 사전에 정의된 시나리오(action)에 따라 관리할 수 있다.
 
 - 반환값 : [state, dispatcher] 형태의 배열
-  - dispatcher: state를 업데이트하는 함수, action 객체를 인수로 받는다.
+    - dispatcher: state를 업데이트하는 함수, action 객체를 인수로 받는다.
 - 인수: (reducer, initialState, init)
-  - reducer: action을 정의하는 함수
-  - init 초깃값을 지연 생성하는 함수 (게으른 초기화)
+    - reducer: action을 정의하는 함수
+    - init 초깃값을 지연 생성하는 함수 (게으른 초기화)
 
 #### useReducer 사용 예제
 
@@ -890,8 +873,9 @@ export default function App() {
 
   return (
     <div>
-      <h1>{state.count}</h1>
-      <button onClick={handleUpButtonClick}>+</button>
+            <h1>{state.count}</h1>      <button onClick={handleUpButtonClick}>
+        +
+      </button>   {" "}
     </div>
   );
 }
@@ -942,8 +926,7 @@ const Input = forwardRef((props, ref) => {
 });
 
 function App() {
-  const inputRef = useRef();
-  // ...
+  const inputRef = useRef(); // ...
   const handleClick = () => {
     // 부모 컴포넌트에서 자식의 커스텀 메서드(alert)를 실행할 수 있다.
     inputRef.current.alert();
@@ -968,7 +951,7 @@ function App() {
 
 - 동기적으로 발생한다는 것은 useLayoutEffect가 완료될 때까지 브라우저가 화면을 그리지 않는다는 뜻이다.
 - 용도 : DOM은 계산됐지만 화면에 반영되기 전에 하고 싶은 작업이 있을 때 화면 깜빡임을 방지할 수 있다.
-  - 스크롤 위치 제어, 애니메이션 등
+    - 스크롤 위치 제어, 애니메이션 등
 
 # 1.10 useDebugValue
 
@@ -976,8 +959,7 @@ function App() {
 
 ```tsx
 function useDate() {
-  const date = new Date();
-  // 개발자 도구에 "현재 시간: ..." 형태로 표시됨
+  const date = new Date(); // 개발자 도구에 "현재 시간: ..." 형태로 표시됨
   useDebugValue(date, (date) => `현재 시간: ${date.toISOString()}`);
   return date;
 }
@@ -996,13 +978,13 @@ function useDate() {
 ```tsx
 // 훅은 순서에 아주 큰 영향을 받는다.
 {
-  memoizedState: 0, // useState 1
-  next: {
-    memoizedState: false, // useState 2
-    next: {
-       // useEffect ...
-    }
-  }
+  memoizedState: 0, // useState 1
+  next: {
+    memoizedState: false, // useState 2
+    next: {
+       // useEffect ...
+    }
+  }
 }
 ```
 
@@ -1036,6 +1018,10 @@ function useFetch<T>(url: string) {
 - 컴포넌트 자체의 로직을 재사용하기 위한 방법으로 , 컴포넌트를 인수로 받아 새로운 컴포넌트를 반환하는 함수다.
 - 가장 유명한 예 : `React.memo`
 
+#### 고차 함수
+
+함수를 결과로 반환하는 함수
+
 #### 예시 인증 처리 HOC
 
 ```tsx
@@ -1054,7 +1040,7 @@ function withLoginComponent(Component) {
 
 # 2.3 무엇을 선택해야 할까?
 
-| 구분           | 추천 상황                                                              | 이유                                                                                   |
-| -------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| 사용자 정의 훅 | "단순히 useEffect, useState 등 공통 로직을 격리할 때"                  | "컴포넌트 내부에 미치는 영향을 최소화하고, 개발자가 반환값을 유연하게 사용할 수 있음." |
-| 고차 컴포넌트  | "렌더링 결과물에 영향을 미치는 공통 로직 (예: 로그인 체크, 에러 처리)" | 함수형 컴포넌트의 반환값(UI)을 변경하거나 컴포넌트를 감춰야 할 때 유용함               |
+| 구분            | 추천 상황                                                             | 이유                                                                                 |
+| --------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 사용자 정의 훅  | 단순히 useEffect, useState 등 공통 로직을 격리할 때                   | 컴포넌트 내부에 미치는 영향을 최소화하고, 개발자가 반환값을 유연하게 사용할 수 있음  |
+| 고차 컴포넌트   | 렌더링 결과물에 영향을 미치는 공통 로직 (예: 로그인 체크, 에러 처리)  | 함수형 컴포넌트의 반환값(UI)을 변경하거나 컴포넌트를 감춰야 할 때 유용함             |
