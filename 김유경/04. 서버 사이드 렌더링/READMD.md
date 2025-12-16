@@ -192,9 +192,9 @@ JAN 스택을 채택한 프로젝트의 문제점은 보안
 **멀티 페이지 애플리케이션에서 발생하는 라우팅 문제를 해결하기 위한 API가 브라우저에 추가되고 있음**
 
 - `back forward cache(bfcache)` : 같은 출처(origin)에서 라우팅이 일어날 경우 화면을 잠깐 하얗게 띄우는 대신 이전 페이지의 모습을 잠깐 보여주는 기법
-  <a src="https://www.youtube.com/watch?v=_me7_7C6Drs">적용 예시</a>
+  - [적용 예시](https://www.youtube.com/watch?v=_me7_7C6Drs)
 - `Shared Element Transitions` : 페이지 라우팅이 일어났을 때 두 페이지에 동일 요소가 있다면 해당 콘텍스트를 유지해 부드럽게 전환되게 하는 기법
-  <a src="https://developer.android.com/develop/ui/compose/animation/shared-elements?hl=ko">적용 예시 </a>
+  - [적용 예시](https://developer.android.com/develop/ui/compose/animation/shared-elements?hl=ko)
 
 이러한 기법은 모두 싱글 페이지 애플리케이션에서 구현 가능하지만, 완벽하게 구현하려면 자바스크립트와 CSS 등의 도움을 받아야하고, 상당한 리소스가 소모된다.
 => 평균적인 노력으로 평균적인 사용자 경험을 제공한다고 가정하면 별도의 최적화를 거쳐야 하는 싱글 페이지 애플리케이션보다 서버에서 렌더링되는 멀티 페이지 애플리케이션이 더 나은 경험을 제공
