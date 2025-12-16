@@ -1,61 +1,75 @@
-# 2장. 리액트 핵심 요소 깊게 살펴보기
-
 # 2.1 JSX란
 
-> JSX는 리액트의 전유물이 아니다
-
-- JSX는 리액트 등장으로 메타에서 소개한 새로운 구문
+- **JavaScript Syntax eXtension, JavaScript를 확장한 문법**
+- JSX는 리액트가 등장하면서 메타에서 소개한 새로운 구문
 - 반드시 리액트에서만 써야되는건 아님
 
-### **JSX**
+### 특징
 
-- XML유사한 내장형 구문
+- XML유사한 형태(태그, 계층 구조)
+
+  ```xml
+  XML
+
+  - eXtensible Markup Language
+  - 계층 구조로 데이터를 표현
+  - JSON 이전 데이터 교환의 표준
+
+  <user>
+    <name>Adam</name>
+    <age>20</age>
+  </user>
+  ```
+
 - Javascript 표준(ECMAScript)을 따르진 않음
 - **반드시!** 트랜스파일러를 거쳐야 유효한 JS코드로 변환됨
 
 ### **JSX의 목적**
 
-- HTML이나 XML을 JS 내부에 쓰려는게 아님
-- 코드를 간결하고 친숙하게 쓸 수 있도록 설계되어 있음
-- 다양한 Attributes를 가진 트리 구조를 토큰화 해서 JS로 변환하는 데 초점이 있음
-- 트랜스파일링으로 JS(ECAMScript)로 변경하는게 주 목적
-
-### **XML?**
-
-- e**X**tensible **M**arkup **L**anguage
-- 계층 구조로 데이터를 표현
-- JSON 이전 데이터 교환의 표준
-
-```html
-<user>
-  <name>Adam</name>
-  <age>20</age>
-</user>
+```tsx
+// 여기는 표준 자바스크립트 영역 (함수 선언)
+function Component() {
+  // 여기도 표준 자바스크립트 영역 (반환 키워드)
+  return (
+    // ⬇️여기가 바로 JSX 문법 영역
+    <div />
+  );
+}
 ```
+
+> **JSX 내부에 트리 구조로 표현하고 싶은 다양한 것들을 작성해두고,
+> 트랜스파일을 통해 JavaScript(ECAMScript)가 이해할 수 있는 코드로 변경하는 것이 목표**
+
+- HTML이나 XML을 JS 내부에 표현할 수 있음
+- 코드를 간결하고 친숙하게 쓸 수 있도록 설계되어 있음
+- 다양한 Attributes를 가진 트리 구조를 토큰화 해서 JavaScript로 변환할 수 있음
+- 항상 return 문에만 사용해야 하는 건 아님 - 변수에 담거나 함수 인자로 넘겨줄 수 있음
 
 ## 2.1.1 JSX의 정의
 
-### 1️⃣ JSXElement / JSXElementName
+**아래 개념들은 JSX 언어 Spec으로, JSX코드의 각 부분을 부르는 명칭**
 
-- React에서 HTML 외 컴포넌트 이름은 무조건 대문자 ⇒ 기존 태그와 구별하기 위함
-
-### JSXElement
+### 1️⃣ JSXElement
 
 - JSX의 가장 기본 요소
-- 다음과 같은 형태를 만족해야 함
+- 다음과 같은 형태 중 하나여야 함
 
 1. **JSXOpeningElement**
-   1. <JSXElement JSXAttribute(optional)>
-   2. `<button type="button">`
+   1. `<JSXElement JSXAttribute(optional)>`
+      (_e.g._ `<button type="button">`)
+   2. 가장 일반적인 요소, ClosingElement가 반드시 후행되어야 함
 2. **JSXClosingElement**
-   1. </ JSXElement>
-   2. `</button>`
+   1. `</ JSXElement>`
+      (_e.g.._ `</button>`)
+   2. 종료를 알리는 요소, OpeningElement가 반드시 선행되어야 함
 3. **JSXSelfClosingElement**
-   1. <JSXElement JSXAttribute(optional) />
-   2. `<button type=”button” />`
+   1. `<JSXElement JSXAttribute(optional) />`
+      (_e.g._`<button type=”button” />`)
+   2. 혼자 쓸 수 있는 형태로 자식을 포함할 수 없음
 4. **JSXFragment**
 
-   1. <>JSXChildren(optional)</>
+   1. `<>JSXChildren(optional)</>`
+   2. 비어있는 태그, SelfClosing할 수 없음
 
    ```jsx
    <>
@@ -66,11 +80,12 @@
 
 ### JSXElementName
 
-- JSXElement의 요소 이름으로 쓸 수 있는것
+- JSXElement의 요소 이름으로 쓸 수 있는 것들
 
 1. **JSXIdentifier**
 
-   1. **JS 식별자 규칙**과 동일
+   1. JSX 내부의 식별자
+   2. **JS 식별자 규칙**과 동일
 
       > 식별자는 대소문자를 구별하며 유니코드 글자, $, \_, 숫자(0-9)로 구성할 수 있지만, **숫자로 시작할 수는 없음**
       >
@@ -82,8 +97,8 @@
       >
       > [](data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==)
 
-   2. “$”, “\_” 외에 다른 특수문자(숫자 등)로 시작하는 이름은 안됨
-   3. `<$></$>`, `<_></_>`
+   3. “$”, “\_” 외에 다른 특수문자(숫자 등)로 시작하는 이름은 안됨
+   4. `<$></$>`, `<_></_>`
 
 2. **JSXNamespacedName**
    1. `[JSXIdentifier]:[JSXIdentifier]` 형태로 사용이 가능,
@@ -95,23 +110,28 @@
    3. NamespacedName과 함께 쓰는건 불가능
    4. `<foo.bar></foo.bar>`
 
-> **🤔 JSXNamespacedName를 쓰긴 하는건가?**
-> 레거시 또는 SVG, XML 라이브러리 등 아주 특수한 경우에만 씀
-
-- HTML에서 JSXNamespacedName 형태로 태그를 쓰면 그냥 커스텀 태그(빈 div 태그)로 취급함
-
 ### 2️⃣ JSXAttributes
 
 **JSXElement에 부여할 수 있는 속성을 의미**
 
 1. **JSXSpreadAttributes**: 자바스크립트 전개 연산자와 동일한 역할
+
    1. `{ ...AssignmentExpression }`
+
+   ```tsx
+   const props = { title: "Hello", age: 20 };
+
+   <MyComponent {...props} />
+   // 위 코드는 아래랑 똑같음
+   <MyComponent title="Hello" age={20} />
+   ```
+
 2. **JSXAttribute**: “키 = 값” 형태로 표현
    1. JSXAttributeName
    - JSXIdentifier, JSXNamespacedName 사용할 수 있음
    2. JSXAttributeValue
    - 문자열, AssignmentExpression, JSXElement, JSXFragment 등 쓸 수 있음
-     1. `<Child attribute={<div>heUo</div>} />` 처럼 `{}`로 감싸는건 prettier 규칙…
+     1. `<Child attribute={<div>heUo</div>} />` 처럼 `{}`로 감싸는건 prettier 규칙…\*
      2. _eslint-react의 [no-children-prop](https://www.eslint-react.xyz/docs/rules/no-children-prop) rule 같은것도 있음 → children은 Attribute말고 태그로 감싸자_
 
 ### 3️⃣ JSXChildren
@@ -124,7 +144,7 @@
   - JSXElement
   - JSXFragment
   - JSXChildExpression: 표현식 형태로도 쓸 수 있음
-    ⇒ `return<>{(()=>'foo')()}</>`
+    ⇒ `return <>{ (()=>'foo')() }</>`
 
 ### 4️⃣ JSXstrings
 
@@ -199,8 +219,8 @@ var ComponentC = (0, _jsxRuntime.jsx)('div', {
 
 트랜스파일 결과를 살펴보면
 
-- JSXElement를 첫번째 인수로 선언, 요소를 정의한다.
-- JSXChildren, JSXAttributes, JSXStrings등 optional 값은 인수로 넘겨서 처리
+- JSXElement를 `createElement`의 첫번째 인수로 선언, 요소를 정의
+- JSXChildren, JSXAttributes, JSXStrings등 optional 값은 그 다음 인수로 넘겨줌
 
 ```jsx
 // JSX 트랜스파일링의 특성을 활용, 코드 리팩터링이 가능
@@ -227,11 +247,53 @@ function TextOrHeading({
 - JSXNamespacedName
 - JSXMemberExpression
 
-위와 같은 문법은 리액트에서 잘 사용하지 않는다.
+위와 같은 문법은 리액트에서 잘 사용하지 않음
 
 Preact, SolidJS, Nano JSX 등 JSX를 채택하고 위 문법들을 사용하는 경우도 있음
 
-> _🤔 JSXMemberExpression은 UI라이브러리 등에서 간혹 쓰는 것 같기도…_
+### 🤔 JSXMemberExpression은 UI라이브러리 등에서 간혹 쓰는 것 같기도…
+
+- **JSXMemberExpression**과 **객체 프로퍼티 접근**은 같은 코드를 바라보는 **"서로 다른 시점(Time)"**
+
+- **컴파일 타임(문법 검사)**과 **런타임(실제 실행)**이라는 두 가지 시점으로 나누어 설명할 수 있음.
+
+#### **1. 컴파일 타임 - JSXMemberExpression (문법적 허용)**
+
+이 단계는 코드가 실행되기 전, 바벨(Babel) 같은 트랜스파일러가 코드를 읽고 해석하는 단계.
+
+여기서 **JSXMemberExpression**은 일종의 **"통행증"** 역할을 함
+
+- 컴파일러가 `<Modal.Content />`라는 코드를 읽음
+- 원래 태그 이름(`div`, `span`, `MyComponent`)에는 점(.)이 없음,
+  이거 문법 오류(Syntax Error) 아닌가?
+- **JSXMemberExpression** 규칙에 따르면 태그 이름을 `식별자.식별자` 형태로 쓸 수 있고, 하나의 덩어리로 인정해주기로 약속함
+- 에러를 내지 않고, 이 부분을 **"Modal 객체 안에 있는 Content를 가리키는 태그"**라고 이해하고 넘어감
+
+> 여기서 컴파일러는 Modal이 실제로 존재하는지, Content가 진짜 함수인지와 상관 없이 오직 **"점(.)이 있는 문법이 유효한가?"**만 판단
+
+#### **2. 변환(Transpilation) 결과**
+
+컴파일러링 후 JSX 코드는 브라우저가 이해할 수 있는 순수 자바스크립트로 변환됨
+
+`<Modal.Content />`
+
+변환 후 >>
+`React.createElement(Modal.Content, null);`
+
+문자열 `"Modal.Content"`가 아니라, 자바스크립트 변수 접근 방식 `Modal.Content`으로 변환
+
+#### 3. 런타임 - 객체 프로퍼티 접근 (실제 실행 시점)
+
+브라우저가 위에서 변환된 자바스크립트 코드를 실제로 실행하는 단계
+
+여기서 **객체 프로퍼티 접근**이 일어남
+
+- 자바스크립트 엔진이 `React.createElement(Modal.Content, ...)` 줄을 실행
+- **자바스크립트 엔진 동작 과정:**
+  1. `Modal`이라는 변수(객체)를 찾음 (없으면 ReferenceError 발생)
+  2. `Modal` 객체 안에서 점(.) 연산자를 통해 `Content`라는 키(프로퍼티)를 찾음
+  3. 찾아낸 그 값(보통은 컴포넌트 함수)을 `createElement`의 첫 번째 인자로 넘겨줌
+- **결과:** 화면에 UI가 나타남
 
 ---
 
@@ -252,7 +314,7 @@ Preact, SolidJS, Nano JSX 등 JSX를 채택하고 위 문법들을 사용하는 
 3. HTML 파싱 → DOM 트리 생성
 4. CSS 있는 경우 다운로드, 파싱 → CSSOM 트리 생성
 5. DOM 노드 순회
-   - 사용자 눈에 보이는 노드만 (e.g. **`displace: none` 제외**)
+   - 사용자 눈에 보이는 노드만 ('displace: none' 제외)
    - 트리 분석 성능 향상을 위함
 6. 해당 노드에 대한 CSSOM 정보 검색
 7. CSS 적용 - 두 가지 과정으로 나눌 수 있음
@@ -315,16 +377,15 @@ Preact, SolidJS, Nano JSX 등 JSX를 채택하고 위 문법들을 사용하는 
 > 1. 가상 DOM, 실제 DOM 비교 및 변경사항 수집
 > 2. **변경 관련 정보를 가지고 있는 파이버를 기준**으로 렌더링 요청
 >
-> 재조정(reconciliation)이란 리액트에서 어떤 부분을 새롭게 렌더링 할 지
-> 가상 ↔ 실제 DOM을 비교하는 작업(알고리즘)
+> > 재조정(reconciliation)이란 리액트에서 어떤 부분을 새롭게 렌더링 할 지
+> > 가상 ↔ 실제 DOM을 비교하는 작업(알고리즘)
 
 ### 파이버의 역할
 
 - 아래 작업들은 모두 비동기로 진행됨
-
-1. 작업을 작은 단위로 분할, 우선순위 배정
-2. 작업 일시중지 및 재개
-3. 이전 작업 재사용 또는 폐기
+  1. 작업을 작은 단위로 분할, 우선순위 배정
+  2. 작업 일시중지 및 재개⭐️
+  3. 이전 작업 재사용 또는 폐기
 
 ### 파이버 특징
 
@@ -332,19 +393,16 @@ Preact, SolidJS, Nano JSX 등 JSX를 채택하고 위 문법들을 사용하는 
 - 파이버는 하나의 작업 단위로 구성되어 있고
 - 작업단위를 하나씩 처리한 후 `finishedWork()`로 마무리 함
 - 이 작업을 커밋해서 실제 DOM에 변경사항을 만들어냄
-
-1. 렌더 단계
-   1. 사용자에게 노출되지 않는 모든 비동기 작업 수행
-   2. 파이버의 작업, 우선순위 선정, 중지 등 작업 발생
-2. 커밋 단계
-   1. `commitWork()`
-   2. DOM에 실제 변경사항을 반영하기 위한 작업
-   3. 동기식으로 일어남
-
+  1. 렌더 단계
+     1. 사용자에게 노출되지 않는 모든 비동기 작업 수행
+     2. 파이버의 작업, 우선순위 선정, 중지 등 작업 발생
+  2. 커밋 단계
+     1. `commitWork()`
+     2. DOM에 실제 변경사항을 반영하기 위한 작업
+     3. 동기식으로 일어남
 - 작업들을 작은 단위로 나누거나, 애니메이션 처럼 우선 순위가 높은 착업을 우선 처리하는 등 유연하게 처리됨
 
-> 리액트의 실체는 사실 가상 DOM이 아닌 Value UI
-> => 즉, 값을 가진 UI를 관리하는 라이브러리다
+> 리액트의 실체는 사실 가상 DOM이 아닌, Value UI 즉, 값을 가진 UI를 관리하는 라이브러리다
 
 ### 파이버의 구현
 
@@ -354,16 +412,16 @@ Preact, SolidJS, Nano JSX 등 JSX를 채택하고 위 문법들을 사용하는 
 
 ### 주요 속성
 
-- **tag**: 파이버의 1:1 매칭 정보를 가지고 있음
-- **stateNode**: 파이버 자체에 대한 참조 정보, 참조를 바탕으로 파이버 관련 상태에 접근함
-- **child, sibling, return**: 파이버 간 관계를 나타냄, 트리 형식을 구성하는데 필요한 정보
+- tag: 파이버의 1:1 매칭 정보를 가지고 있음
+- stateNode: 파이버 자체에 대한 참조 정보, 참조를 바탕으로 파이버 관련 상태에 접근함
+- child, sibling, return: 파이버 간 관계를 나타냄, 트리 형식을 구성하는데 필요한 정보
   - child(하나)만 존재함
   - 형제 노드는 sibling 속성으로 나타냄
   - 작업완료 후 복귀할 상위 태그를 return 속성으로 표시
-- **index**: 속성으로 형제들 사이 순서를 표현
-- **pendingProps**: 렌더링 완료 후 memoizedProps로 저장해 관리함
-- **updateQueue**: 상태업데이트, 콜백함수, DOM 업데이트 등 필요한 작업을 담아두는 큐
-- **memoizedState**:
+- index: 속성으로 형제들 사이 순서를 표현
+- pendingProps: 렌더링 완료 후 memoizedProps로 저장해 관리함
+- updateQueue: 상태업데이트, 콜백함수, DOM 업데이트 등 필요한 작업을 담아두는 큐
+- memoizedState:
 
   - 함수형 컴포넌트의 훅 목록 저장, useSatae 뿐만 아니라 모든 훅 리스트를 저장함
   - 컴포넌트 내부에서 호출한 훅들을 연결리스트 형태로 저장함
@@ -389,14 +447,14 @@ Preact, SolidJS, Nano JSX 등 JSX를 채택하고 위 문법들을 사용하는 
   // null
   ```
 
-- **alternate**: 반대편 파이버 트리를 가리킴
+- alternate: 반대편 파이버 트리를 가리킴
 
 ### 더블 버퍼링
 
-리액트 파이버 트리는 리액트 내부에 사실 **두 개** 존재하는데
+리액트 파이버 트리는 리액트 내부에 사실 **두 개 존재**하는데
 
 1. **fiber 트리**: **현재 모습**을 담고 있음
-2. **workInProgress** 트리: 작업 중인 상태를 나타냄
+2. **workInProgress 트리**: 작업 중인 상태를 나타냄
 3. 파이버의 작업이 완료되면, 포인터만 변경해서 WIP트리를 현재 트리로 바꿈
 
 ⇒ **더블 버퍼링!**
@@ -426,8 +484,8 @@ Preact, SolidJS, Nano JSX 등 JSX를 채택하고 위 문법들을 사용하는 
 ### 파이버와 가상 DOM의 관계
 
 - 파이버의 비동기 작업과 달리, **실제 DOM에 반영**하는 것은 **동기적**으로 일어나야 함
-- 처리량이 많아 화면에 불완전한 상태로 표시될 가능성이 높아서, 메모리(가상)에서 먼저 수행 후
-  ⇒ 최종결과물만 실제 브라우저 DOM에 적용함
+- 처리량이 많아 화면에 불완전한 상태로 표시될 가능성이 높아서, 메모리상(가상)에서 먼저 수행 후
+  최종결과물만 실제 브라우저 DOM에 적용함
 
 ### 파이버 ≠ 가상 DOM
 
@@ -465,7 +523,7 @@ Preact, SolidJS, Nano JSX 등 JSX를 채택하고 위 문법들을 사용하는 
 # 2.3 클래스형 컴포넌트와 함수형 컴포넌트
 
 - 함수형 컴포넌트는 리액트 0.14버전에 만들어짐
-- “stateless functional component”라 해서, 상태 없이 정적 렌더링이 목적
+- **“stateless functional component”**라 해서, 상태 없이 **정적 렌더링**이 목적
 
 ```jsx
 var Aquarium = (props) => {
@@ -497,7 +555,7 @@ class Samplecomponent extends React.Component {
 - extends로 만들 컴포넌트를 확장
   1. React.Component
   2. React.PureComponent
-     ⇒ 위 두 가지는 **shouldComponentUpdate**를 다루는 데 차이점이 있음
+     ⇒ **shouldComponentUpdate**를 다루는 데 차이점이 있음
 
 ### props, state 정의
 
@@ -509,6 +567,7 @@ interface SampleProps {
   required?: boolean;
   text: strin9;
 }
+
 // state 타입
 interface SampleState {
   count: number;
@@ -552,48 +611,77 @@ class SampleComponent extends React.component<SampleProps, SampleState> {
 }
 ```
 
-- **props**: 컴포넌트에 속성을 전달하는 용도
+- props: 컴포넌트에 속성을 전달하는 용도
   - `<SampleComponent text=”안녕하세요” />`
-- **state**: 클래스형 컴포넌트 내부에서 관리하는 값
-- **메서드**: 렌더링 함수 내부에서 사용되는 함수, 주로 DOM에서 발생하는 이벤트와 함께 사용됨
+- state: 클래스형 컴포넌트 내부에서 관리하는 값
+- 메서드: 렌더링 함수 내부에서 사용되는 함수, 주로 DOM에서 발생하는 이벤트와 함께 사용됨
 
-  1. constructor에서 this 바인딩
+  - 메서드를 생성하는 방식은 크게 3가지
 
-     ```tsx
-     // .bind(x) : 이 함수가 실행될 때 내부의 this를 x로 고정함
+    1. constructor에서 this 바인딩
 
-     this.handleClick.bind(this);
-     // this(인스턴스)를 this로 고정한 새로운 함수 생성
+       ```tsx
+       class Counter extends Component {
+         constructor(props) {
+           super(props);
+           this.state = { count: 0 };
 
-     this.handleClick = this.handleClick.bind(this);
-     // 새로운 함수를 다시 인스턴스에 덮어씀
-     ```
+           // "handleClick 안에서의 'this'는 이 컴포넌트를 가리켜라"라고 고정
+           this.handleClick = this.handleClick.bind(this);
+         }
 
-     **리액트 내부에서 함수를 호출**
+         handleClick() {
+           // bind를 안 하면 여기서 this가 undefined가 되어 에러 발생
+           // Error: Cannot read property 'setState' of undefined
+           this.setState({ count: this.state.count + 1 });
+         }
 
-     ```tsx
-     <button onClick={this.handleClick} />
+         render() {
+           return <button onClick={this.handleClick}>클릭</button>;
+         }
+       }
+       ```
 
-     // 여기서 onClick은 함수 참조만 넘겨줌
-     // 이벤트 발생 시 넘겨준 함수를 React코드가 직접 호출
-     ```
+       - constructor가 아닌 일반 함수로 호출하면 this에 전역 객체가 바인딩 됨
+         (strict 모드에서는 undefined)
+       - `.bind(x)`로 강제로 컨텍스트를 고정함
 
-     **리액트 내부**
+    2. 화살표 함수 쓰기
 
-     ```tsx
-     function dispatchEvent(e) {
-       // 이벤트 감지
-       handler(e); // 넘겨준 this.handleClick 호출
-     }
-     ```
+       ```tsx
+       class Counter extends Component {
+         state = { count: 0 };
 
-     - 위와같은 구조로 인해 this(호출 컨텍스트)가 날아갈 수 있어서
-     - `.bind(x)`로 컨텍스트를 고정함
+         // 메서드를 '화살표 함수'로 선언합니다.
+         // 자동으로 this가 컴포넌트 인스턴스로 바인딩됩니다.
+         handleClick = () => {
+           this.setState({ count: this.state.count + 1 });
+         };
 
-  2. 화살표 함수 쓰기
-     - `<button onClick={() => this.handleClick()} />`
-     - 하지만 매번 렌더링마다 새로운 함수가 생성되기 때문에 최적화가 어려움
-     - 지양하는 것이 좋다~
+         render() {
+           return (
+             <button onClick={this.handleClick}>클릭 (화살표 함수)</button>
+           );
+         }
+       }
+       ```
+
+       - 최신 자바스크립트 문법에서 constructor를 안써도 알아서 처리해줌
+
+    3. Render 내부에서 bind
+
+       ```tsx
+       render() {
+         // bind 사용
+         return <button onClick={this.handleClick.bind(this)}>클릭</button>;
+
+         // 인라인 화살표 함수
+         return <button onClick={() => this.handleClick()}>클릭</button>;
+       }
+       ```
+
+       - 리렌더링시 마다 함수가 새로 생성되기 때문에 비추
+       - 성능 저하, props 전달 시 불필요한 리렌더링 유발 가능성
 
 ### 클래스형 컴포넌트의 생명주기 메서드
 
@@ -601,9 +689,9 @@ class SampleComponent extends React.component<SampleProps, SampleState> {
 
 생명주기 메서드가 실행되는 시점은 크게 3가지
 
-- **마운트**: 컴포넌트가 생성되는 시점
-- **업데이트**: 이미 생성된 컴포넌트의 내용이 변경되는 시점
-- **언마운트**: 컴포넌트가 더 이상 존재하지 않는 시점
+- 마운트: 컴포넌트가 생성되는 시점
+- 업데이트: 이미 생성된 컴포넌트의 내용이 변경되는 시점
+- 언마운트: 컴포넌트가 더 이상 존재하지 않는 시점
 
 ### **1. `render()`**
 
@@ -721,7 +809,7 @@ export default function CompareComponent() {
 
 ### 6. `static getDerivedStateFromProps()`
 
-- 18 버전 기준 최근에 도입된 생명주기 메서드
+- 18버전 기준 최근에 도입된 생명주기 메서드
 - 과거의 `componentWiillRecieveProps`를 대체할 수 있는 메서드
 - `render()` 직전에 매번 호출됨
   - props의 변경
@@ -733,16 +821,16 @@ export default function CompareComponent() {
 - `null` 을 반환하면 아무 일도 일어나지 않음
 
 > 기본적으로 React는 props와 state의 분리를 권장하지만
-> props로 들어온 값을 state에 복사해야 하는 경우와 같이 특수한 상황에 사용하는 고-급 API
+> props로 들어온 값을 state에 복사해야 하는 경우와 같이 특수한 상황에 사용하는 고급 API
 > _e.g. “props로 들어온 값으로 내부에서 가공된 state를 만들어야 할 때”_
 
 ### 7. `getSnapshotBeforeUpdate()`
 
-- 18 버전 기준 최근에 도입된 생명주기 메서드
+- 18버전 기준 최근에 도입된 생명주기 메서드
 - `componentWillUpdate()`를 대체할 수 있는 메서드
 - DOM 업데이트 직전에 호출됨
 - 반환값은 `componentDidUpdate()`로 전달됨
-- DOM 렌더링 전 윈도우 크기를 조절하거나 스크롤 위치를 조정하는 등 작업에 유용
+- DOM렌더링 전 윈도우 크기를 조절하거나 스크롤 위치를 조정하는 등 작업에 유용
 
 ```jsx
 // props로 받은 배열의 길이가 길어진 경우
@@ -767,9 +855,12 @@ componentDidUpdate(prevProps: Props, prevState: State, snapshot: Snapshot) {
 
 ### 생명주기 메서드 다이어그램
 
-...
-
 ### 에러상황에 실행되는 메서드
+
+> 아래 두 메서드와 `getSnapshotBeforeUpdate()`는 리액트 훅으로 구현되어있지 않기 때문에
+> 필요한 경우 반드시 클래스형 컴포넌트로 사용해야 한다.
+
+> 19버전에서 따로 관련 업데이트는 없는것 같다..
 
 ```jsx
 // ErrorBoundary.tsx
@@ -839,11 +930,6 @@ function MyComponent() {
 }
 ```
 
-아래 두 메서드와 `getSnapshotBeforeUpdate()`는 리액트 훅으로 구현되어있지 않기 때문에
-필요한 경우 반드시 클래스형 컴포넌트로 사용해야 한다.
-
-> 19버전에서 따로 관련 업데이트는 없는것 같다..
-
 ### 8. `getDerivedStateFromError()`
 
 - 자식 컴포넌트에서 에러가 발생했을 때 호출되는 에러메서드
@@ -890,13 +976,13 @@ function App() {
 
 ### 클래스형 컴포넌트의 한계
 
-- 데이터 흐름을 **추적하기 어려움**
-- 내부 로직의 **재사용이 어려움**
-- 컴포넌트 내부 로직이 많아질수록, 크기가 **기하급수적으로 커짐**
-- 함수에 비해 **높은 난이도**
-- 코드 사이즈 **최적화가 어려움**
+- 데이터 흐름을 추적하기 어려움
+- 내부 로직의 재사용이 어려움
+- 컴포넌트 내부 로직이 많아질수록, 크기가 기하급수적으로 커짐
+- 함수에 비해 높은 난이도
+- 코드 사이즈 최적화가 어려움
   - 번들링 시에 이름 최소화(minified)나 트리쉐이킹이 되지 않음
-- 핫 리로딩(hot reloading)에 **불리함**
+- 핫 리로딩(hot reloading)에 불리함
   - 클래스형 컴포넌트는 최초 렌더링 시에 instance를 생성하고, 내부에서 state를 관리함
   - instance 내부 render의 수정사항을 반영하려면 instance를 새로 만들어야 함
   - instance가 새로 만들어지면, 결국 값도 초기화 됨
@@ -946,7 +1032,7 @@ function Counter() {
 
 ## 2.3.2 함수형 컴포넌트
 
-- React 16.8 에서 함수형 컴포넌트에서 사용 가능한 훅이 등장함
+- 16.8에서 함수형 컴포넌트에서 사용 가능한 훅이 등장함
 - 코드가 간결해짐
 - render 내부에 묶일 필요가 없고, this 바인딩을 신경쓰지 않아도 됨
 - state는 객체가 아니라 각각 원시값으로 관리됨
@@ -964,7 +1050,9 @@ function Counter() {
 ### 함수형 컴포넌트와 렌더링된 값
 
 > 함수형 컴포넌트는 렌더링된 값을 고정하고, 클래스형 컴포넌트는 그렇지 못하다
-> \- 댄 아브라모프, (리액트 개발자)
+
+- 댄 아브라모프, 리액트 개발자
+  >
 
 ### 클래스형 컴포넌트를 공부해야 할까?
 
@@ -1016,7 +1104,7 @@ function Counter() {
 - `useState()`의 `setter` 실행
 - `useReducer()`의 `dispatch` 실행
 - `key` props 변경 - 모든 컴포넌트에서 사용할 수 있는 특수한 props
-- props 변경
+- React.memo 사용 시 props 변경
 - 부모 컴포넌트 리렌더링 ⇒ 무조건 자식 컴포넌트 리렌더링
 
 ### `key` props
@@ -1061,9 +1149,9 @@ componentDidMount, componentDidUpdate 실행
 
 **비교대상**
 
-1. **type**
-2. **props**
-3. **key**
+1. type
+2. props
+3. key
 
 ### 커밋 단계(Commit Phase)
 
@@ -1130,34 +1218,12 @@ function D = memo(() {
 
 1. `B` 컴포넌트의 setState 호출
 2. `B` 컴포넌트의 리렌더링 작업이 렌더링 큐에 들어감
-3. ~~리액트는 트리 최상단에서부터 렌더링 경로를 검사함~~
-   ⇒ 업데이트가 발생한 FiberNode를 루트로 그 하위만 렌더링
+3. 리액트는 트리 최상단에서부터 렌더링 경로를 검사함
+   ⇒ 업데이트가 발생한 FiberNode를 루트로 그 하위만 다시 그리는 것 **처럼 보임**(재사용)
 4. `A` 컴포넌트는 리렌더링 필요 표시가 없으므로 따로 작업 안함
 5. `B` 는 업데이트 필요, 리렌더링
 6. `B` 리렌더링으로 반환되는 `C` 리렌더링
 7. `D`는 memoization으로 리렌더링 방지
-
-> **🤔 Props 변경 ≠ 리렌더링**
->
-> 1. 부모가 리렌더링됨
-> 2. 부모에서 자식에게 새로운 props 전달됨
-> 3. 자식은 새로운 props 비교 후
->    - React.memo 없음 → 무조건 리렌더
->    - React.memo 있음 → 비교해서 같으면 스킵
->
-> 즉, 리렌더링 원인은 항상 “해당 Fiber가 업데이트 대상으로 표시되었는가”로 결정됨
-
-> 리렌더의 원인은 아래 중 하나:
->
-> - 해당 컴포넌트 Fiber에 state 업데이트 발생
-> - 해당 컴포넌트 Fiber에 부모의 렌더링으로 인해 새 element가 생성됨
-> - context value 변경
-> - reducer 업데이트
-> - forceUpdate (클래스)
-> - Suspense boundary 활동
-> - error boundary 동작 등
->
-> props 자체는 단독으로 리렌더링을 발생시키지 않음
 
 ---
 
@@ -1178,8 +1244,7 @@ function D = memo(() {
 
 > 19 버전에 컴파일러 출시로 쉬워졌지만, 여전히 모든 상황에 완벽히 적용되진 않음
 
-> 자동 최적화가 “개발자 노-력 없이 성능 확보”를 보장해주진 않음
-> → 상황에 따라 기존 방식의 판단과 적용이 필요함
+> 자동 최적화가 “개발자 노-력 없이 성능 확보”를 보장해주진 않음 → 상황에 따라 기존 방식의 판단과 적용이 필요함
 
 ## 2.5.1 섣최독(섣부른 최적화는 독이다!)
 
@@ -1187,11 +1252,10 @@ function D = memo(() {
 - 메모이제이션도 비용이 드는 작업
   1. 값 비교, 렌더링/재계산 여부 확인 작업
   2. 저장 비용(메모리)
-- **“premature optimization”** 라고 한다고 함
-- 메모이제이션이 **“silver bullet”** 은 아니다
+- **“premature optimization”**라고 한다고 함
+- 메모이제이션이 **“silver bullet”**은 아니다
 
 > useMemo를 사용하지 않고도 작동할 수 있도록 코드를 작성하고, 그것을 추가해 성능을 최적화 하세요
-> [공식문서](https://ko.react.dev/reference/react/useMemo)
 
 ---
 
