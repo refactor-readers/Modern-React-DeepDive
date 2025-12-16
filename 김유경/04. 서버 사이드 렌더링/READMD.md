@@ -213,3 +213,154 @@ JAN 스택을 채택한 프로젝트의 문제점은 보안
   - 최초 웹 사이트 진입 시에는 서버 사이드 방식으로 서버에서 완성된 HTML을 제공 받음
   - 이후 라우팅에서는 서버에서 내려받은 자바스크립트를 바탕으로 마치 싱글 페이지 애플리케이션처럼 작동
     - Next.js, Remix 등이 이러한 방식으로 동작
+
+# 4.2 서버 사이드 렌더링을 위한 리액트 API 살펴보기
+
+리액트 애플리케이션을 서버에서 렌더링할 수 있는 API도 제공하지만, 이는 window 환경이 아닌 Node.js와 같은 서버 환경에서만 실행할 수 있음
+
+## 4.2.1 `renderToString`
+
+인수로 넘겨 받은 리액트 컴포넌트를 렌더링해 HTML문자열로 반환하는 함수
+
+- 서버 사이드 렌더링을 구현하는 데 가장 기초적인 API
+- 최초의 페이지를 HTML로 먼저 렌더링한다고 언급했는데, 바로 그 역할을 하는 함수가 `renderToString`이다.
+
+```tsx
+import ReactDOMServer from "react-dom/server";
+
+function ChildrenComponent({ fruits }: { fruits: Array<string> }) {
+  useEffect(() => {
+    console.log(fruits);
+  }, [fruits]);
+
+  function handleClick() {
+    console.log("hello");
+  }
+
+  return (
+    <ul>
+      {fruits.map((fruit) => (
+        <li key={fruit} onClick={handleClick}>
+          {fruit}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function SampleComponent() {
+  return (
+    <>
+      <div>hello</div>
+      <ChildrenComponent fruits={["apple", "banana", "peach"]} />
+    </>
+  );
+}
+
+const result = ReactDOMServer.renderToString(
+  React.createElement("div", { id: "root" }, <SampleComponent />)
+);
+```
+
+위 result는 다음과 같은 문자열을 반환한다
+
+```ts
+<div id="root" data-reactroot="">
+  <div>hello</div>
+  <ul>
+    <li>apple</li>
+    <li>banana</li>
+    <li>peach</li>
+  </ul>
+</div>
+```
+
+- `data-reactroot`는 리액트의 루트 앨리먼트가 무엇인지 식별하는 역할을 함
+  - 이후에 자바스크립트를 실행하기 위한 hydrate 함수에서 루트를 식별하는 기준점이 됨
+
+#### 주의할 점
+
+- useEffect와 같은 훅, 이벤트 핸들러는 반환 결과물에 포함되지 않음
+  => 전달된 리액트 컴포넌트를 브라우저가 빠르게 렌더링할 수 있는 HTML로 제공하는데 목적이 있어, 클라이언트에서 실행되는 자바스크립트를 포함시키거나 렌더링까지 하지는 않음
+
+#### 사용 시 이점
+
+- 서버 사이드의 이점과 초기 렌더링에서의 뛰어난 성능
+- 검색 엔진이나 SNS 공유를 위한 메타 정보도 renderToString에서 미리 준비한 채로 제공할 수 있음
+
+## 4.2.2 `renderToStaticMarkup`
+
+- `renderToString`과 매우 유사한 함수로, 두 함수 모두 리액트 컴포넌트를 기준으로 HTML문자열을 만든다는 점에서 동일
+- 루트 요소에 추가한 `data-reactroot`와 같은 리액트에서만 사용하는 추가적인 DOM 속성을 만들지는 않음
+  - 리액트에서만 사용하는 속성을 제거하면 결과물인 HTML의 크기를 아주 약간이라도 줄일 수 있다는 장점이 있음
+
+```tsx
+// ... 이하 생략
+const result = ReactDOMServer.renderToStaticMarkup(
+  React.createElement("div", { id: "root" }, <SampleComponent />)
+);
+
+<div id="root">
+  <div>hello</div>
+  <ul>
+    <li>apple</li>
+    <li>banana</li>
+    <li>peach</li>
+  <ul>
+</div>
+```
+
+리액트와 관련된 코드인 `data-reactroot`가 사라진 완전히 순수한 HHTML 문자열이 반환됨
+
+- 이 함수를 실행한 결과로 렌더링을 수행하면 클라이언트에서는 리액트에서 제공하는 useEffect 같은 브라우저 API를 절대로 실행할 수 없음
+  => 서버와 클라이언트의 내용이 맞지 않다는 에러 발생
+
+#### 결론
+
+블로그 글, 상품의 약관 정보 같은 브라우저 액션이 없는 정적인 내용만 필요한 경우에 사용하자 !
+
+## 4.2.3 `renderToNodeStream`
+
+`renderToString`과 결과물이 완전히 동일하지만 두 가지 차이점이 있음
+
+1. 브라우저에서 사용하는 것이 절대 불가능
+
+- `renderToString`과 `renderToStaticMarkup`은 브라우저에서도 실행가능
+- 사용을 시도하면 에러 발생
+
+2. 결과물의 타입
+
+- `renderToString`은 결과물이 string인 문자열
+- `renderToNodeStream`의 결과물은 Node.js의 `ReadableStream`
+
+  - 이는 utf-8로 인코딩된 바이트 스트림으로, Node.js 환경에서만 사용할 수 있음
+  - 브라우저가 원하는 결과물인 string을 얻기 위해서는 추가적인 처리가 필요하다
+  - `ReadableStream` 자체는 브라우저에서도 사용할 수 있는 객체지만, 이를 만드는 과정이 브라우저에서 불가능하게 구현되어 있음
+
+  ### 🤔 이거 왜 필요함?
+
+📝 스트림(Stream) <br />
+: 큰 데이터를 다룰 때 데이터를 청크(chunk, 작은 단위)로 분할해 조금씩 가져오는 방식을 의미
+
+- 이름에서도 알 수 있듯이, `renderToNodeStream`을 이용하면 HTML이 여러 청크로 분리돼 내려와 리액트 애플리케이션을 렌더링하는 Node.js 서버의 부담을 줄일 수 있음
+
+## 4.2.4 `renderToStaticNodeStream`
+
+`renderToString`에 `renderToStaticMarkup`이 있다면, `renderToNodeStream`에는 `renderToStaticNodeStream`이 있다.
+
+- `renderToNodeStream`과 제공하는 결과물은 동일하나, `renderToStaticMarkup`과 마찬가지로 리액트 자바스크립트에 필요한 리액트 속성이 제공되지 않음
+  - hydrate를 할 필요가 없는 순수 HTML 결과물이 필요할 때 사용하는 메서드
+
+## 4.2.5 hydrate
+
+`renderToString`과 `renderToNodeStream`으로 생성된 HTML 콘텐츠에 자바스크립트 핸들러나 이벤트를 붙이는 역할
+
+#### `render` 메서드
+
+- 인수로 컴포넌트와 HTML 요소를 전달 받아 HTML의 요소에 해당 컴포넌트를 렌더링하고, 여기에 이벤트 핸들러를 붙이는 작업까지 한 번에 수행
+
+#### render와의 차이점 p.278 (PDF 308)
+
+- hydrate는 기본적으로 이미 렌더링된 HTML이 있다는 가정하에 작업이 수행 됨
+  - 이 렌더링된 HTML을 기준으로 이벤트를 붙이는 작업만 실행
+  - 두 번째 인수로 `renderToStaticMarkup` 등으로 생성된, 리액트 관련 정보가 없는 순수한 HTML 정보를 넘겨주면?
