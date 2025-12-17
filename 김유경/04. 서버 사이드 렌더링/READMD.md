@@ -359,8 +359,329 @@ const result = ReactDOMServer.renderToStaticMarkup(
 
 - 인수로 컴포넌트와 HTML 요소를 전달 받아 HTML의 요소에 해당 컴포넌트를 렌더링하고, 여기에 이벤트 핸들러를 붙이는 작업까지 한 번에 수행
 
-#### render와의 차이점 p.278 (PDF 308)
+#### `render`와 `hydrate`의 차이점 p.278 (PDF 308)
 
 - hydrate는 기본적으로 이미 렌더링된 HTML이 있다는 가정하에 작업이 수행 됨
   - 이 렌더링된 HTML을 기준으로 이벤트를 붙이는 작업만 실행
-  - 두 번째 인수로 `renderToStaticMarkup` 등으로 생성된, 리액트 관련 정보가 없는 순수한 HTML 정보를 넘겨주면?
+  - 두 번째 인수로 `renderToStaticMarkup` 등으로 생성된, 리액트 관련 정보가 없는 순수한 HTML 정보를 넘겨줘야 한다
+
+서버에서 렌더링한 정보가 없어서 경고가 노출됐음에도 불구하고, 리액트는 이 함수를 통해 정상적으로 웹페이지를 만든다.
+
+- `hydrate` 작업이 이벤트 핸들러를 추가하는 것 외에도 렌더링을 한 번 수행하면서 `hydrate`가 수행한 렌더링 결과물인 HTML과 인수로 넘겨받은 HTML을 비교하는 작업을 수행하기 떄문이다.
+
+상당히 꼼꼼한 친구네요
+
+=> 여기서 발생한 불일치가 에러의 원인!
+=> 불일치할 때는 `hydrate`가 렌더링한 결과물을 기준으로 웹페이지를 그림
+=> 이런 과정이 올바른 과정은 아닌게, 이렇게 되면 사실상 서버와 클라이언트에서 두 번 렌더링하고, 서버 사이드 렌더링의 장점을 포기하는 거니까 고치긴 해야 됨
+
+#### But, 다를 수 밖에 없는 경우가 있지요?
+
+HTML 내부에 현재 시간을 초 단위까지 기록해야할 때는, 서버 사이드 렌더링과 hydrate가 아무리 빨리 끝나도 1초 단위로 끝나지 않는 이상 불일치가 발생할 수 밖에 없어서 `hydrate`가 에러를 발생시킴
+
+그럴 때는
+
+- 해당 요소에 `suppressHydrationWarning`을 추가해 경고를 끌 수 있음
+  => 꼭! 필요한 곳에 제한적으로 사용해야 함
+- HTML에 정확한 시간을 기록하기 위한 목적이면, 서버에서 실행되는 것보다 차라리 useEffect를 통해 노출하는 편이 더 정확해서 서버에서는 굳이 해당 함수를 실행하지 않는게 나을 지도
+
+## 4.2.6 서버 사이드 렌더링 예제 프로젝트
+
+cool하게 생략
+
+# 4.3 Next.js 톺아보기
+
+## 4.3.1 Next.js란?
+
+`Vercel`이라는 미국 스타트업에서 만든 리액트 기반 서버 사이드 렌더링 **프레임워크**
+
+- PHP에 영감을 받아 만들어졌으며, 실제로 PHP의 대용품으로 사용되기 위해 만들었다고 언급
+  - 설계부터 서버 사이드 렌더링을 염두에 둔 듯
+
+#### Next.js가 대세가 되기 전 페이스북의 `react-page`가 있었다.
+
+- 지금은 개발 중지
+- Next.js의 페이지 구조, 실제 디렉터리 구조가 곧 URL로 변환되는 것이 react-page에서 이미 라우팅을 위해 구현해 놓은 기능임
+
+#### 리액트 기반 프로젝트에서 Next.js를 선택하는 것이 합리적인 이유
+
+- 다른 프레임워크에 비해 사용자가 많음
+- 모기업인 Vercel의 전폭적인 지원을 받고 있음
+- Next.js 뿐만 아니라, SWR, SWC, Turbopack, Svelte 등 웹 생태계 전반에 영향력 있는 프로젝틀를 계속해서 개발하거나 인수
+- 꾸준히 새로운 기능을 추가해서 릴리즈 하고 있음
+
+## 4.3.2 Next.js 시작하기
+
+`npx create-next-app@latest --ts`
+
+### package.json
+
+- `next` : Next.js의 기반이 되는 패키지
+- `eslint-config-next` : Next.js 기반 프로젝트에서 사용하도록 만들어진 ESLint 설정으로, 구글과 협업해 만든 핵심 웹 지표(core web vital)에 도움이 되는 규칙들이 내장돼 있다.
+  => 꼭 사용하는게 좋을 것이다--
+
+### next.config.js
+
+Next.js 프로젝트의 환경 설정을 담당하며, Next.js를 자유자재로 다루려면 반드시 알아야하는 파일
+
+```js
+/** @type {import('next').NextConfig} */
+
+const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+};
+
+module.exports = nextConfig;
+```
+
+- swcMinify: Vercel에서는 SWC라 불리는 또 다른 오픈 소스를 만들었는데, 이 도구는 번들링과 컴파일을 더욱 빠르게 수행하기 위해 만들어졌다. 바벨의 대안이라고 볼 수 있으며, 국내 개발자 강동윤 님이 만든 프로젝트로, 개발자 분이 Vercel에 합류하면서 SWC또한 Next.js와 함께하게 됐다 (대박)
+
+#### swcMinify를 쓰면 바벨보다 빠를 수 있는 이유
+
+- 자바스크립트 기반의 바벨과는 다르게 Rust라는 완전히 다른 언어로 작성함
+  - Rust는 C/C++과 동등한 수준의 속도를 보여줌
+  - Rust는 병렬로 작업을 처리함
+
+### pages/\_app.tsx
+
+pages 폴더가 경우에 따라서는 src 하단에 존재할 수도 있다.
+
+- `_app.tsx`, 그리고 내부에 있는 default export로 내보낸 함수는 애플리케이션의 전체 페이지의 시작점
+  - 공통으로 설정해야 하는 것들을 여기에 실행
+    - 에러 바운더리를 사용해 애플리케이션 전역에서 발생하는 에러 처리
+    - reset.css 같은 전역 css 선언
+    - 모든 페이지에서 공통으로 사용 또는 제공해야 하는 데이터 제공 등
+
+#### 서버 사이드 프레임워크의 특징을 확인할 수 있는 방법 ~!
+
+- `_app.tsx`의 `render()` 내부에 console.log를 추가해서 아무 메시지 기록하면 새로고침 했을 때 Next.js를 실행한 터미널에 기록됨(브라우저 콘솔창이 아니라)
+  - 여기에서 페이지 전환하면 서버가 아니라 브라우저 콘솔창에 로깅됨
+
+=> 최초에는 서버 사이드 렌더링을 하고, 이후에는 클라이언트에서 `_app.tsx`의 렌더링이 실행된다 ! 는 사실을 알 수 있다구~!
+
+### pages/\_document.tsx
+
+create-next-app으로 생성했다면 해당 페이지가 존재하지 않음
+=> 없어도 실행에 지장 X
+
+```tsx
+import { Html, Head, Main, NextScript } from "next/document";
+
+export default function Document() {
+  return (
+    <Html lang="ko">
+      <Head />
+      <body className="body">
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  );
+}
+```
+
+- `_app.tsx`가 애플리케이션 페이지 전체를 초기화하는 곳이라면, `_document.tsx`는 애플리케이션의 HTML을 초기화하는 것이다.
+
+#### `_app.tsx`와 `_document.tsx`의 차이점
+
+- `<html>`이나 `<body>`에 DOM 속성을 추가하고 싶으면 `_document.tsx`
+- `_app.tsx`는 렌더링이나 라우팅에 따라 서버나 클라이언트에서 실행할 수 있는데, `_document.tsx`는 무조건 서버에서 실행
+  => onClick 같은 이벤트 핸들러 추가는 불가능, 이벤트 추가는 클라이언트에서 실행되는 `hydrate`의 몫
+- Next.js에는 두 가지 `<head>`가 존재
+  - 1. `next/document`에서 제공
+    - 오직 document.tsx에서만 사용 가능
+    - `<Head />` 내부에서는 `<title />` 사용 불가능
+  - 2. `next/head`에서 기본적으로 제공
+    - 브라우저의 `<head />`와 동일한 역할
+    - 페이지에서 사용 가능하며, SEO에 필요한 정보나 title 등을 담을 수 있음
+- `getServerSideProps`, `getStaticProps` 등 서버에서 사용 가능한 데이터 불러오기 함수는 여기에서 사용할 수 없음
+- `_document.tsx`에서만 가능 => CSS-in-JS`의 스타일을 서버에서 모아서 HTML로 제공하는 작업
+
+#### 정리
+
+- `_app.tsx`는 Next.js를 초기화하는 파일로 설정과 관련된 코드를 모아두는 곳이고, 서버와 클라이언트 모두에서 렌더링될 수 있음
+- `_document.tsx`는 Next.js를 만드는 웹 사이트의 뼈대가 되는 HTML 설정과 관련된 코드를 추가하는 곳이고, 반드시 서버에서만 렌더링 됨
+
+### pages/\_error.tsx
+
+기본적으로 생성 X
+=> 없어도 실행하는 데 지장 X
+
+- 클라이언트 에러 또는 서버 500 에러 처리할 목적
+
+### pages/404.tsx
+
+404 페이지 정의하는 파일
+
+### pages/500.tsx
+
+서버에서 발생하는 에러를 핸들링하는 페이지
+
+- `_error.tsx`와 `500.tsx`가 모두 있으면 `500.tsx`가 우선적으로 실행
+
+### pages/index.tsx
+
+개발자가 자유롭게 명칭을 지정해 만들 수 있는 페이지
+
+- 라우팅이 파일명으로 이어지는 구조
+- /pages 디렉터리를 기초로 구성되고, 각 페이지에 있는 default export로 내보낸 함수가 해당 페이지의 루트 컴포넌트가 됨
+
+해당 내용은 Next.js의 공식 문서를 보는게 더 나을 것 같아요
+[Next.js 공식문서 라우팅](https://nextjs.org/docs/app/getting-started/route-handlers#route-handlers)
+
+#### 서버 라우팅과 클라이언트 라우팅의 차이
+
+Next.js는 서버 사이드 렌더링을 수행하지만 동시에 싱글 페이지 애플리케이션 같이 클라이언트 라우팅 또한 수행한다.
+
+Next.js는 서버 사이드 렌더링 프레임워크이기 때문에 최초 페이지 렌더링이 서버에서 수행
+
+- next/link는 `<a/>`와 비슷한 동작을 하지만,
+
+  - 개발자 도구의 네트워크 탭을 보면 `<a />` 태그는 모든 리소스를 처음부터 다시 받지만, `<Link>` 태그로 이동하면 페이지 이동에 필요한 내용만 받음
+
+- a태그는 서버에서 렌더링을 수행하고, 클라이언트에서 hydrate 하는 과정에서 한 번 더 실행 더 실행됨 (콘솔이 서버와 클라이언트에 동시에 기록 됨)
+
+=> `<a>` 대신 `<Link>` 사용
+=> `window.location` 대신 `router.push` 사용
+
+#### `getServerSideProps`
+
+- `getServerSideProps`이 있으면 서버 사이드 런타임 체크가 되어 있음
+- `getServerSideProps`이 없으면 빌드 크기도 약간 줄고 정적 페이지로 분류
+
+=> Next.js는 서버 사이드 렌더링 프레임워크이지만, 모든 작업이 서버에서 일어나는 것은 아님
+
+### /pages/api/hello.ts
+
+서버의 API를 정의하는 폴더
+
+- 기본적인 디렉터리에 따른 라우팅 구조는 페이지와 동일하지만, /pages/api가 /api라는 접두사가 붙는다는 점이 다르다.
+- /pages/api/hello.ts는 /api/hello로 호출 가능
+
+  - 이 주소는 다른 pages 파일과는 다르게, 단순히 서버 요청을 주고 받음
+
+- 서버에서 내려주는 데이터를 조합해 BFF(backend-for-frontend) 형태로 활용하거나
+- 완전한 풀스택 애플리케이션을 구축하고 싶을 때
+- CORS(Cross-Origin Resource Sharing) 문제를 우회하고 싶을 때
+  사용한다
+
+## 4.3.3 Data Fetching
+
+Next.js에서는 서버 사이드 렌더링 지원을 위한 몇 가지 데이터 불러오기 전략이 있고, 이를 `Data Fetching`이라고 함
+
+pages/ 폴더에 있는 라우팅이 되는 파일에서만 사용할 수 있고, 예약어로 지정되어 반드시 정해진 함수명으로 export를 사용해 함수를 파일 외부로 내보내야 한다.
+
+- 서버에서 미리 필요한 페이지를 만들어서 제공하거나, 해당 페이지 요청이 있을 때마다 서버 데이터를 조회해서 미리 페이지를 만들어서 제공할 수 있음
+
+### `getStaticPaths`와 `getStaticProps`
+
+이 두 함수는 어떤 페이지를 CMS(Contents Management System)나 블로그, 게시판과 같이 사용자와 관계없이 정적으로 결정된 페이지를 보여주고자 할 때 사용하는 함수다
+
+- 이 두 가지는 반드시 함께 있어야 사용할 수 있다
+
+1. getStaticPaths
+
+- /pages/post/[id]가 접근 가능한 주소를 정의하는 함수
+- 여기서 정의한 params 중에 하나가 넘어와야 접근이 가능하고 나머지는 404 반환
+
+2. getStaticProps
+
+- 앞서 정의한 페이지를 기준으로 해당 페이지로 요청이 왔을 때 제공할 props를 반환
+- 정의한 params가 제한되어 있을 경우, fetchPost(a), fetchPost(b) 를 기준으로 각각 함수의 응답 결과를 변수로 가져와 props의 {post}로 반환하게 된다
+
+3. pages/post/[id] 페이지
+
+- 앞서 getStaticProps가 반환한 post를 렌더링
+
+=> 이 두 함수를 사용하면 빌드 시점에 미리 데이터를 불러온 다음에 정적인 HTML 페이지를 만들 수 있음
+
+#### 사용 시 이점
+
+- 사용자가 접근할 수 있는 페이지를 모조리 빌드해두고 배포하면 사용자는 굳이 페이지가 렌더링되는 것을 기다릴 필요 없이 이미 완성돼 있는 페이지를 받기만 하면 되므로 굉장히 빠르게 해당 페이지를 확인할 수 있음
+
+### `getServerSideProps`
+
+서버에서 실행되는 함수로, 페이지 진입 전에 이 함수를 실행
+
+- 응답값에 따라 페이지의 루트 컴포넌트에 props를 반환할 수도, 혹은 다른 페이지로 리다이렉트 시킬 수도 있다.
+- 해당 함수가 있으면 Next.js는 꼭 서버에서 실행해야 하는 페이지로 분류 해 빌드 시에도 서버용 자바스크립트 파일을 별도로 만든다.
+
+#### `NEXT_DATA__` script
+
+이 스크립트는 `getServerSideProps`의 정보인 props뿐만 아니라, 현재 페이지 정보, query 등 Next.js 구동에 필요한 다양한 정보가 담겨 있는데
+
+❓ Why? script 형태로 삽입되어 있을까?
+
+리액트의 서버 사이드 렌더링
+
+1. 서버에서 fetch 등으로 렌더링에 필요한 정보를 가져온다
+2. 1번에서 가져온 정보를 기반으로 HTML을 완성한다
+3. 2번의 정보를 클라이언트(브라우저)에 제공한다
+4. 3번의 정보를 바탕으로 클라이언트에서 hydrate 작업을 한다. 이 작업은 DOM에 리액트 라이프사이클과 이벤트 핸들러를 추가하는 작업이다
+5. 4번 작업인 hydrate로 만든 리액트 컴포넌트 트리와 서버에서 만든 HTML이 다르다면 불일치 에러를 뱉는다 (suppressHydrationWarning)
+6. 5번 작업도 1번과 마찬가지로 fetch 등을 이용해 정보를 가져와야 한다
+
+=> 1번과 6번 사이에 fetch 시점에 따라 결과물의 불일치가 발생할 수 있으므로, 1번에서 가져온 정보를 결과물인 HTML에 script 형태로 내려주는 것이다
+=> 이 작업을 거치면 1번의 작업을 6번에서 반복하지 않아도 되어, 불필요한 요청을 막을 수 있을 뿐더러 시점 차이로 인한 결과물의 차이도 막을 수 있다
+=> Next.js는 이 정보를 window 객체에도 저장해 둔다.
+
+#### 알 수 있는 정보
+
+- 리액트의 JSX와는 다르게 getServerSideProps의 props로 내려줄 수 있는 값은 JSON으로 제공할 수 있는 값으로 제한됨
+- props의 결과를 HTML에 정적으로 작성해서 내려주기 떄문에 JSON으로 직렬화할 수 없는 값, class나 Date 등은 props로 제공할 수 없음
+
+#### 서버에서 실행되어 생기는 제약
+
+- window, document와 같이 브라우저에서만 접근할 수 있는 객체에는 접근 불가
+- API 호출 시/ api/some/path와 같이 protocol과 domain 없이 fetch 요청을 할수 없다.
+  - 브라우저와 다르게 서버는 자신의 호스트를 알 수 없기 때문
+    => 완전한 주소를 주세요
+- 여기서 에러가 발생하면 500.tsx와 같이 미리 정의해둔 에러 페이지로 리다이렉트 된다
+
+### getInitialProps
+
+`getStaticProps`나 `getServerSideProps`가 나오기 전에 사용할 수 있던 유일한 페이지 데이터 불러오기 수단
+
+- 굉장히 제한적인 예시에서만 사용됨
+
+## 4.3.4 스타일 적용하기
+
+### 전역 스타일
+
+`CSS Reset`이라 불리는, 브라우저 기본 스타일링 일괄 제거 등은 `_app.tsx`이용하면 됨
+
+### 컴포넌트 레벨 CSS
+
+`[name].module.css`
+
+- 명명 규칙만 준수하면 다른 컴포넌트의 클래스명과 겹쳐서 스타일에 충돌이 일어나지 않도록 고유한 클래스명을 제공
+
+### SCSS와 SASS
+
+- `npm install --save-dev sass` 명령어로 설치하면 별도의 설정 없이 사용 가능
+- scss에서 제공하는 variable을 사용하고 싶으면 export 문법을 사용하면 된다
+
+### CSS-in-JS
+
+- 리액트 내부 트리 내부에서 사용하고 있는 styled-components의 스타일을 모두 모은 뒤, 이 각각의 스타일에 유니크한 클래스명을 부여해 스타일이 충돌하지 않게 클래스명과 스타일을 정리
+- 이를 `_document.tsx`가 서버에서 렌더링할 때 React.Context 형태로 제공
+
+=> 이 과정을 거치지 않으면 스타일이 브라우저에 늦게 추가되서 FOUC(flash of unstyled content) 발생
+
+- 별도 설정 없이 쓰고 싶을 땐 `Next.js`에서 만든 styled-jsx, styled-components,Emotion 쓰면 됨
+
+## 4.3.5 \_app.tsx 응용하기
+
+첫 렌더링만 서버 사이드로 실행되고 나머지는 getServerSideProps가 있어도 해당 페이지의 getServerSideProps 결과를 json 파일만을 요청해서 가져오는 것을 활용하면
+
+- 웹서비스를 최초에 접근했을 때만 실행하고 싶은 내용을 app.getInitialProps 내부에 담아둘 수 있다.
+  - useAgent 확인
+  - 사용자 정보
+    => 애플리케이션 전역에서 걸쳐 사용해야 하는 정보 등을 호출하는 작업 수행
+
+## 4.3.6 next.config.js 살펴보기
+
+// 생략하겠어요
+
+[Next.js 공식문서 config.js](https://nextjs.org/docs/app/api-reference/config/next-config-js)
