@@ -207,5 +207,195 @@ _app.tsx가 애플리케이션 페이지 전체를 초기화하는 곳이라면,
 
 - 이후에 설명할 getServerSideProps, getStaticProps 등 서버에서 사용 가능한 데이터 불러오기 함수는 여기에서 사용할 수 없다.
 
-_document.tsx에서만 할 수 있는 작업은 CSS-in-JS(emotion, styled-component)의 스타일을 서버에서 모아 HTML로 제공하는 작업이다
+_document.tsx에서만 할 수 있는 작업은 CSS-in-JS(emotion, styled-component)의 스타일을 서버에서 모아 HTML로 제공하는 작업이다.
 
+요약하자면  _app.tsx는 next.js를 초기화하는 파일이고 _document.tsx는 뼈대가 되는 HTML설정과 관련된 코드를 추가하는 곳이다
+
+### pages/_error.tsx
+
+500에러를 처리하는 파일이다
+
+### pages/404.tsx
+
+404 페이지를 정의하는 파일이다
+
+### pages/500.tsx
+
+서버에서 발생하는 에러를 핸들링하는 페이지이다 _error.tsx와 함께 있다면 500.tsx가 우선적용된다
+
+### pages/index.tsx
+
+next.js에서 제공하는 예약어로 관리되는 페이지라면 지금부터는 개발자가 자유롭게 명칭을 지정해 만들 수 있는 페이지다.
+
+- /pages/index.tsx: 웹사이트의 루트이며, localhost:3000과 같은 루트 주소를 의미한다.
+
+- /pages/hello.tsx: /pages가 생략되고 파일명이 주소가 된다. 즉, 여기서는 /hello이며 localhost:3000/hello로 접근할 수 있다.
+
+- /pages/hello/world.tsx: localhost:3000/hello/world로 접근 가능하다. 디렉터리의 깊이만큼 주소를 설정할 수 있다.
+  - 주의사항: hello/index.tsx와 hello.tsx 모두 같은 주소를 바라보므로 필요에 따라 선택해서 사용한다.
+
+- /pages/hello/[greeting].tsx: []의 의미는 여기에 어떠한 문자도 올 수 있다는 뜻이다.
+  - 사용자가 접속한 주소명이 greeting이라는 변수에 담겨 서버 사이드로 전달된다.
+  - 예를 들어 localhost:3000/hello/1, localhost:3000/hello/greeting 모두 유효하며, 변수 값은 각각 1, greeting이 된다.
+  - 이미 정의된 주소(예: /pages/hello/world.tsx)가 있다면 미리 정의된 주소가 우선한다.
+
+- /pages/hi/[...props].tsx: 자바스크립트의 전개 연산자와 동일하게 작동한다.
+/hi 하위의 모든 주소가 여기로 온다. (예: localhost:3000/hi/hello/world/foo 등)
+이때 [...props] 값은 props라는 이름의 변수에 배열 형태로 전달된다.
+
+```js
+const { query: { props } } = useRouter()
+```
+이와 같이 []안에 값을 추출할 수 있다
+
+- /hi/1 → ['1']
+- /hi/1/2 → ['1', '2']
+- /hi/1/2/3 → ['1', '2', '3']
+- /hi/my/name/is → ['my', 'name', 'is']
+
+### 서버 라우팅과 클라이언트 라우팅의 차이
+
+```<a>``` vs ```<Link>```
+
+- ```<a>```: 링크 이동시 필요한 모든 리소스를 다시 받아온다
+  - 서버에서 렌더링을 수행하고, 클라이언트에서 hydrate하는 과정에서 한 번 더 실행된다
+
+- ```<Link>```: 페이지 이동에 필요한 리소스만 받아온다
+  - 서버 사이드 렌더링이 아닌, 클라이언트에서 필요한 js만 불러온 뒤 라우팅하는 클라이언트 라우팅/렌더링 방식으로 작동한다
+
+그로인해 next.js의 장점을 살리기 위해 다음과 같은 규칙을 지켜야한다
+
+- ```<a>```대신 ```<Link>```를 사용한다
+- window.location.push 대신 router.push를 사용한다.
+
+### getServerSideProps를 제거하면 어떻게 될까
+
+제거하면 페이지는 Static으로 취급되어 빌드시 미리 트리쉐이킹이 일어난다
+
+즉, 제거하면 ssr로 작동하지 않는다
+
+### pages/api/hello.ts
+
+다른 pages파일과 다르게 HTML요청을 하는게 아니라 단순 서버 요청을 주고받게 된다
+
+당연히 서버에서만 실행되고 BFF형태로 활용하거나 완전한 풀스택 애플리케이션일때 사용한다 혹은 CORS를 우회하고자 할때 사용한다
+
+### DATA Fetching
+예약어로 지정되어 반드시 정해진 함수명으로 export를 사용해 SSR를 구현할 수 있다
+
+### getstaticPaths와 getStaticProps
+
+이 두 함수는 어떠한 페이지를 정적인 페이지로 보여주고자 할 때 사용된다
+
+```js
+import { GetStaticPaths, GetStaticProps } from 'next'
+
+// 빌드 시 생성할 경로를 정의합니다.
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [{ params: { id: '1' } }, { params: { id: '2' } }],
+    fallback: false,
+  }
+}
+
+// 빌드 시 데이터를 불러옵니다.
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { id } = params
+  const post = await fetchPost(id)
+
+  return {
+    props: { post },
+  }
+}
+
+// 불러온 데이터를 사용하여 페이지를 렌더링합니다.
+export default function Post({ post }: { post: Post }) {
+  // post로 페이지를 렌더링한다.
+}
+```
+
+- getstaticPaths는 /pages/post/[id]가 접근 가능한 주소를 정의하는 함수도 paths를 배열로 반환한다
+
+- getStaticProps는 앞에서 정의한 페이지를 기준으로 요청이 오면 제공할 props를 반환하는 함수다
+
+- post는 getStaticProps가 반환한 post를 렌더링한다
+
+이처럼 정적인 페이지는 빌드시 사용자는 미리 다 완성돼 있는 페이지를 받기만 하면 되기 때문에 매우 빠르다
+
+### getServerSideProps
+
+앞서 두 함수는 정적인 페이지 제공이였다면 getServerSideProps는 서버에서 실행되는 함수다
+페이지 진입시 무조건 실행하며 props를 반환할 수도, 다른 페이지로 리다이렉트시킬 수도 있다.
+
+단, getServerSideProps에서는 반드리 JSON.stringify로 직렬화할 수 있는 값만 제공해야 하고, 값에 대해 가공이 필요하다면 실제 페이지나 컴포넌트에서 하는것이 옳다
+
+getServerSideProps에서는 다음과 같은 제약이 있다
+
+- window.document와 같이 브라우저에서만 접근할 수 있는 객체에는 접근할 수 없다
+- API호출시 /api/some/path와 같이 protocol과 domain 없이 fetch요청을 할 수 없다. 브라우저와 다르게 서버는 자신의 호스트를 유추할 수 없기 때문이다. 반드시 완전한 주소를 제공해야 fetch가 가능하다
+- 여기에서 에러가 발생한다면 500.tsx와 같이 미리 정의해 둔 에러 페이지로 리다이렉트된다
+
+### 스타일 적용하기
+
+#### 전역 스타일
+CSS Reset이라 불리는, 이른바 브라우저에서 기본으로 제공되고 있는 스타일을 초기화하는 등 공동으로 적용하고 싶은 스타일이 있다면 _app.tsx를 활용하면 된다
+
+#### 컴포넌트 레벨 CSS
+[name].module.css와 같은 명명 규칙만 준수하면 컴포넌트 레벨의 CSS를 추가할 수 있다
+
+```css
+.alert {
+  color: red;
+  font-size: 16px;
+}
+```
+```js
+import styles from './Button.module.css'
+
+export function Button() {
+  return (
+    <button type="button" className={styles.alert}>
+      경고!
+    </button>
+  )
+}
+```
+
+위와같이 적용하면 실제 프로덕션 빌드시에 스타일 태그가 아닌 별도 css파일로 생성되어 적용된다
+
+#### SCSS와 SASS
+sass와 scss도 css를 사용했을 때와 마찬가지로 동일한 방식으로 사용할 수 있다. sass 패키지를 npm install --save-dev sass와 같은 명령어로 설치하면 별도의 설정 없이 바로 동일하게 스타일을 사용할 수 있다. scss에서 제공하는 variable을 컴포넌트에서 사용하고 싶다면 export 문법을 사용하면 된다.
+
+```js
+// primary 변수에 blue라는 값을 넣었다.
+$primary: blue;
+
+:export {
+  primary: $primary;
+}
+
+import styles from "./Button.module.scss";
+
+export function Button() {
+  return (
+    {/* styles.primary 형태로 꺼내올 수 있다. */}
+    <span style={{color: styles.primary}}>
+      안녕하세요
+    </span>
+  );
+}
+
+```
+
+#### CSS-in-JS
+최근에는 js내부에 스타일시트를 삽입하는 CSS-in-JS방식의 스타일링이 각광받고 있다
+대표적으로는 Emotion, styled-component등이 있다
+
+사용하려면 _document.tsx에 특정 코드를 넣어줘야 하는데 
+
+리액트 트리 내부에서 사용하고 있는 styled-components의 스타일을 모두 모은 다음, 이 각각의 스타일에 유니크한 클래스명을 부여해 스타일이 충돌하지 않게 클래스명과 스타일을 정리해 이를 _document.tsx가 서버에서 렌더링할 때 React.Context 형태로 제공하는 것이다. 이렇게 CSS-in-JS의 스타일을 서버에서 미리 모은 다음 서버 사이드 렌더링에서 한꺼번에 제공해야 올바른 스타일을 적용할 수 있다. 만약 이런 과정을 거치지 않는다면 스타일이 브라우저에서 뒤늦게 추가되어 **FOUC(flash of unstyled content)**라는, 스타일이 입혀지지 않은 날것의 HTML을 잠시 사용자에게 노출하게 된다. 이는 다른 CSS-in-JS도 마찬가지로, 코드는 약간씩 다르지만 모두 서버에서 스타일을 모아 서버 사이드 렌더링 시에 일괄 적용하는 과정은 동일하게 거치게 된다. 따라서 CSS-in-JS를 Next.js와 같은 서버 사이드 렌더링 프레임워크에서 사용할 때는 반드시 이런 초기화 과정을 서버에서 거쳐야 한다.
+
+
+#### next.config.js 살펴보기
+
+[공식링크](https://nextjs.org/docs/13/app/api-reference/next-config-js)
