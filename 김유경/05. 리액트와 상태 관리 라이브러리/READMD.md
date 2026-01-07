@@ -29,7 +29,7 @@
   - Flux 패턴에 Elm 아키텍처(Model, Update, View)를 도입
   - 하나의 전역 상태 객체(Store)를 두어 Props Drilling 문제를 해결했으나, 보일러플레이트가 많다는 단점이 있음
 
-- Context API와 useContext (v.16.3+)
+- Context API와 useContext (v.16.8+)
 
   - 상태를 하위 컴포넌트에 주입하는 표준 방식을 제공하여 간단한 전역 상태 공유가 가능해짐
 
